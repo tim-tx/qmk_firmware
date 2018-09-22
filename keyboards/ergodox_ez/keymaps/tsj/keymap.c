@@ -1,16 +1,13 @@
 #include QMK_KEYBOARD_H
 #include "debug.h"
 #include "action_layer.h"
-#include "sendchar.h"
-/* #include "virtser.h" */
 #include "version.h"
 
-#define LEADER_TIMEOUT 200
+/* #define LEADER_TIMEOUT 200 */
 
 #define BASE 0 // default layer
 #define SYMB 1 // symbols
 #define MDIA 2 // media keys
-#define TAPPING_TERM 200
 
 enum custom_keycodes {
   PLACEHOLDER = SAFE_RANGE, // can always be here
@@ -54,12 +51,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
 // If it accepts an argument (i.e, is a function), it doesn't need KC_.
 // Otherwise, it needs KC_*
-[BASE] = KEYMAP(  // layer 0 : default
+[BASE] = LAYOUT_ergodox(  // layer 0 : default
         // left hand
 	KC_EQL,         KC_1,          KC_2,          KC_3,        KC_4,   KC_5,   KC_CAPSLOCK,
         KC_DELT,        KC_Q,          KC_W,          KC_E,        KC_R,   KC_T,   OSM(MOD_LSFT),
         KC_BSPC,        KC_A,          KC_S,          KC_D,        KC_F,   KC_G,
-        KC_LSPO,        KC_Z,          KC_X,          KC_C,        KC_V,   KC_B,   KC_LEAD,
+        KC_LSPO,        KC_Z,          KC_X,          KC_C,        KC_V,   KC_B,   KC_NO,
         CTL_T(KC_GRV),  ALT_T(KC_LCBR),GUI_T(KC_RCBR),KC_LEFT,     KC_RGHT,
                                                ALT_T(KC_APP), KC_LGUI,
                                                               KC_HOME,
@@ -68,7 +65,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	TG(SYMB),    KC_6,   KC_7,  KC_8,           KC_9,         KC_0,             KC_MINS,
 	OSL(1),      KC_Y,   KC_U,  KC_I,           KC_O,         KC_P,             KC_BSLS,
 	KC_H,        KC_J,   KC_K,  KC_L,           LT(MDIA, KC_SCLN),KC_QUOT,
-	KC_LEAD,     KC_N,   KC_M,  GUI_T(KC_COMM), KC_DOT,KC_SLSH,   KC_RSPC,
+	KC_NO,     KC_N,   KC_M,  GUI_T(KC_COMM), KC_DOT,KC_SLSH,   KC_RSPC,
 	                     KC_UP, KC_DOWN,        GUI_T(KC_LBRC),ALT_T(KC_RBRC),  CTL_T(KC_FN1),
              KC_LALT,        CTL_T(KC_ESC),
              KC_PGUP,
@@ -96,7 +93,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                                 `--------------------'       `--------------------'
  */
 // SYMBOLS
-[SYMB] = KEYMAP(
+[SYMB] = LAYOUT_ergodox(
        // left hand
        VRSN,            KC_F1,  KC_F2,  KC_F3,  KC_F4,  KC_F5,  KC_TRNS,
        KC_COLON,        KC_EXLM,KC_AT,  KC_LCBR,KC_RCBR,KC_PIPE,LCTL(KC_C),
@@ -139,7 +136,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                                 `--------------------'       `--------------------'
  */
 // MEDIA AND MOUSE
-[MDIA] = KEYMAP(
+[MDIA] = LAYOUT_ergodox(
        KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
        KC_TRNS, KC_TRNS, KC_TRNS, KC_MS_U, KC_TRNS, KC_TRNS, KC_TRNS,
        KC_TRNS, KC_TRNS, KC_MS_L, KC_MS_D, KC_MS_R, KC_TRNS,
@@ -195,290 +192,337 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       break;
     case RGB_SLD:
       if (record->event.pressed) {
-        rgblight_mode(1);
+        #ifdef RGBLIGHT_ENABLE
+          rgblight_mode(1);
+        #endif
       }
       return false;
       break;
-    
   }
   return true;
 }
 
-LEADER_EXTERNS();
+// Runs just one time when the keyboard initializes.
+void matrix_init_user(void) {
+#ifdef RGBLIGHT_COLOR_LAYER_0
+  rgblight_setrgb(RGBLIGHT_COLOR_LAYER_0);
+#endif
+};
 
+// Runs constantly in the background, in a loop.
 void matrix_scan_user(void) {
-LEADER_DICTIONARY() {
-    leading = false;
-    leader_end();
 
-    SEQ_ONE_KEY(KC_J) {
-      register_code(KC_LCTL);
-      register_code(KC_J);
-      unregister_code(KC_J);
-      unregister_code(KC_LCTL);
-    }
-    SEQ_ONE_KEY(KC_K) {
-      register_code(KC_LGUI);
-      register_code(KC_K);
-      unregister_code(KC_K);
-      unregister_code(KC_LGUI);
-    }
-    SEQ_ONE_KEY(KC_A) {
-      register_code(KC_LGUI);
-      register_code(KC_A);
-      unregister_code(KC_A);
-      unregister_code(KC_LGUI);
-    }
-    SEQ_ONE_KEY(KC_S) {
-      register_code(KC_LGUI);
-      register_code(KC_S);
-      unregister_code(KC_S);
-      unregister_code(KC_LGUI);
-    }
-    SEQ_ONE_KEY(KC_D) {
-      register_code(KC_LGUI);
-      register_code(KC_D);
-      unregister_code(KC_D);
-      unregister_code(KC_LGUI);
-    }
-    SEQ_ONE_KEY(KC_F) {
-      register_code(KC_LCTL);
-      register_code(KC_F);
-      unregister_code(KC_F);
-      unregister_code(KC_LCTL);
-    }
-    SEQ_ONE_KEY(KC_1) {
-      register_code(KC_LGUI);
-      register_code(KC_1);
-      unregister_code(KC_1);
-      unregister_code(KC_LGUI);
-    }
-    SEQ_ONE_KEY(KC_2) {
-      register_code(KC_LGUI);
-      register_code(KC_2);
-      unregister_code(KC_2);
-      unregister_code(KC_LGUI);
-    }
-    SEQ_ONE_KEY(KC_3) {
-      register_code(KC_LGUI);
-      register_code(KC_3);
-      unregister_code(KC_3);
-      unregister_code(KC_LGUI);
-    }
-    SEQ_ONE_KEY(KC_4) {
-      register_code(KC_LGUI);
-      register_code(KC_4);
-      unregister_code(KC_4);
-      unregister_code(KC_LGUI);
-    }
-    SEQ_ONE_KEY(KC_5) {
-      register_code(KC_LGUI);
-      register_code(KC_5);
-      unregister_code(KC_5);
-      unregister_code(KC_LGUI);
-    }
-    SEQ_ONE_KEY(KC_6) {
-      register_code(KC_LGUI);
-      register_code(KC_6);
-      unregister_code(KC_6);
-      unregister_code(KC_LGUI);
-    }
-    SEQ_ONE_KEY(KC_7) {
-      register_code(KC_LGUI);
-      register_code(KC_7);
-      unregister_code(KC_7);
-      unregister_code(KC_LGUI);
-    }
-    SEQ_ONE_KEY(KC_8) {
-      register_code(KC_LGUI);
-      register_code(KC_8);
-      unregister_code(KC_8);
-      unregister_code(KC_LGUI);
-    }
-    SEQ_ONE_KEY(KC_P) {
-      register_code(KC_LGUI);
-      register_code(KC_P);
-      unregister_code(KC_P);
-      unregister_code(KC_LGUI);
-   }
-    SEQ_ONE_KEY(KC_E) {
-      register_code(KC_LGUI);
-      register_code(KC_E);
-      unregister_code(KC_E);
-      unregister_code(KC_LGUI);
-    }
-    SEQ_ONE_KEY(KC_R) {
-      register_code(KC_LGUI);
-      register_code(KC_R);
-      unregister_code(KC_R);
-      unregister_code(KC_LGUI);
-    }
-    SEQ_ONE_KEY(KC_P) {
-      register_code(KC_LGUI);
-      register_code(KC_P);
-      unregister_code(KC_P);
-      unregister_code(KC_LGUI);
-    }
-    SEQ_ONE_KEY(KC_U) {
-      register_code(KC_LCTL);
-      register_code(KC_U);
-      unregister_code(KC_U);
-      unregister_code(KC_LCTL);
-    }
-    SEQ_ONE_KEY(KC_I) {
-      register_code(KC_LGUI);
-      register_code(KC_I);
-      unregister_code(KC_I);
-      unregister_code(KC_LGUI);
-    }
-    SEQ_ONE_KEY(KC_A) {
-      register_code(KC_LCTL);
-      register_code(KC_A);
-      unregister_code(KC_A);
-      unregister_code(KC_LCTL);
-    }
-    SEQ_ONE_KEY(KC_X) {
-      register_code(KC_LCTL);
-      register_code(KC_X);
-      unregister_code(KC_X);
-      unregister_code(KC_LCTL);
-    }
-    SEQ_ONE_KEY(KC_C) {
-      register_code(KC_LCTL);
-      register_code(KC_C);
-      unregister_code(KC_C);
-      unregister_code(KC_LCTL);
-    }
-    SEQ_ONE_KEY(KC_V) {
-      register_code(KC_LCTL);
-      register_code(KC_V);
-      unregister_code(KC_V);
-      unregister_code(KC_LCTL);
-    }
-    SEQ_ONE_KEY(KC_K) {
-      register_code(KC_LCTL);
-      register_code(KC_K);
-      unregister_code(KC_K);
-      unregister_code(KC_LCTL);
-    }
-    SEQ_ONE_KEY(KC_B) {
-      register_code(KC_LCTL);
-      register_code(KC_B);
-      unregister_code(KC_B);
-      unregister_code(KC_LCTL);
-    }
-    SEQ_ONE_KEY(KC_U) {
-      register_code(KC_LCTL);
-      register_code(KC_U);
-      unregister_code(KC_U);
-      unregister_code(KC_LCTL);
-    }
-    SEQ_ONE_KEY(KC_T) {
-      register_code(KC_LGUI);
-      register_code(KC_T);
-      unregister_code(KC_T);
-      unregister_code(KC_LGUI);
-    }
-    SEQ_ONE_KEY(KC_BSLS) {
-      register_code(KC_LCTL);
-      register_code(KC_BSLS);
-      unregister_code(KC_BSLS);
-      unregister_code(KC_LCTL);
-    }
-    SEQ_ONE_KEY(KC_SPC) {
-      register_code(KC_LGUI);
-      register_code(KC_SPC);
-      unregister_code(KC_SPC);
-      unregister_code(KC_LGUI);
-    }
-    SEQ_ONE_KEY(KC_LBRC) {
-      register_code(KC_LGUI);
-      register_code(KC_LBRC);
-      unregister_code(KC_LBRC);
-      unregister_code(KC_LGUI);
-    }
-    SEQ_ONE_KEY(KC_LCBR) {
-      register_code(KC_LGUI);
-      register_code(KC_LSFT);
-      register_code(KC_LBRC);
-      unregister_code(KC_LBRC);
-      unregister_code(KC_LSFT);
-      unregister_code(KC_LGUI);
-    }    
-    SEQ_ONE_KEY(KC_RCBR) {
-      register_code(KC_LGUI);
-      register_code(KC_LSFT);
-      register_code(KC_RBRC);
-      unregister_code(KC_RBRC);
-      unregister_code(KC_LSFT);
-      unregister_code(KC_LGUI);
-    }
-    SEQ_ONE_KEY(KC_GRV) {
-      register_code(KC_LGUI);
-      register_code(KC_GRV);
-      unregister_code(KC_GRV);
-      unregister_code(KC_LGUI);
-    }    
-    SEQ_ONE_KEY(KC_LEAD) {
-      register_code(KC_LGUI);
-      register_code(KC_TAB);
-      unregister_code(KC_TAB);
-      unregister_code(KC_LGUI);
-    }
+};
 
-    /* SEQ_ONE_KEY(KC_9) { */
-    /*   register_code(KC_LGUI); */
-    /*   register_code(KC_9); */
-    /*   unregister_code(KC_9); */
-    /*   unregister_code(KC_LGUI); */
-    /* } */
-    /* SEQ_TWO_KEYS(KC_A, KC_S) { */
-    /*   register_code(KC_H); */
-    /*   unregister_code(KC_H); */
-    /* } */
-    /* SEQ_THREE_KEYS(KC_A, KC_S, KC_D) { */
-    /*   register_code(KC_LGUI); */
-    /*   register_code(KC_S); */
-    /*   unregister_code(KC_S); */
-    /*   unregister_code(KC_LGUI); */
-    /* } */
-  }
-  
-  uint8_t layer = biton32(layer_state);
-
+// Runs whenever there is a layer state change.
+uint32_t layer_state_set_user(uint32_t state) {
   ergodox_board_led_off();
   ergodox_right_led_1_off();
   ergodox_right_led_2_off();
   ergodox_right_led_3_off();
-  switch (layer) {
-  case 1:
-    ergodox_right_led_1_on();
-    break;
-  case 2:
-    ergodox_right_led_2_on();
-    break;
-  case 3:
-    ergodox_right_led_3_on();
-    break;
-  case 4:
-    ergodox_right_led_1_on();
-    ergodox_right_led_2_on();
-    break;
-  case 5:
-    ergodox_right_led_1_on();
-    ergodox_right_led_3_on();
-    break;
-  case 6:
-    ergodox_right_led_2_on();
-    ergodox_right_led_3_on();
-    break;
-  case 7:
-    ergodox_right_led_1_on();
-    ergodox_right_led_2_on();
-    ergodox_right_led_3_on();
-    break;
-  default:
-    break;
-  }
 
+  uint8_t layer = biton32(state);
+  switch (layer) {
+      case 0:
+        #ifdef RGBLIGHT_COLOR_LAYER_0
+          rgblight_setrgb(RGBLIGHT_COLOR_LAYER_0);
+        #else
+        #ifdef RGBLIGHT_ENABLE
+          rgblight_init();
+        #endif
+        #endif
+        break;
+      case 1:
+        ergodox_right_led_1_on();
+        #ifdef RGBLIGHT_COLOR_LAYER_1
+          rgblight_setrgb(RGBLIGHT_COLOR_LAYER_1);
+        #endif
+        break;
+      case 2:
+        ergodox_right_led_2_on();
+        #ifdef RGBLIGHT_COLOR_LAYER_2
+          rgblight_setrgb(RGBLIGHT_COLOR_LAYER_2);
+        #endif
+        break;
+      case 3:
+        ergodox_right_led_3_on();
+        #ifdef RGBLIGHT_COLOR_LAYER_3
+          rgblight_setrgb(RGBLIGHT_COLOR_LAYER_3);
+        #endif
+        break;
+      case 4:
+        ergodox_right_led_1_on();
+        ergodox_right_led_2_on();
+        #ifdef RGBLIGHT_COLOR_LAYER_4
+          rgblight_setrgb(RGBLIGHT_COLOR_LAYER_4);
+        #endif
+        break;
+      case 5:
+        ergodox_right_led_1_on();
+        ergodox_right_led_3_on();
+        #ifdef RGBLIGHT_COLOR_LAYER_5
+          rgblight_setrgb(RGBLIGHT_COLOR_LAYER_5);
+        #endif
+        break;
+      case 6:
+        ergodox_right_led_2_on();
+        ergodox_right_led_3_on();
+        #ifdef RGBLIGHT_COLOR_LAYER_6
+          rgblight_setrgb(RGBLIGHT_COLOR_LAYER_6);
+        #endif
+        break;
+      case 7:
+        ergodox_right_led_1_on();
+        ergodox_right_led_2_on();
+        ergodox_right_led_3_on();
+        #ifdef RGBLIGHT_COLOR_LAYER_7
+          rgblight_setrgb(RGBLIGHT_COLOR_LAYER_6);
+        #endif
+        break;
+      default:
+        break;
+    }
+
+  return state;
 };
+
+
+/* LEADER_EXTERNS(); */
+
+/* void matrix_scan_user(void) { */
+/* LEADER_DICTIONARY() { */
+/*     leading = false; */
+/*     leader_end(); */
+
+/*     SEQ_ONE_KEY(KC_J) { */
+/*       register_code(KC_LCTL); */
+/*       register_code(KC_J); */
+/*       unregister_code(KC_J); */
+/*       unregister_code(KC_LCTL); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_K) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_K); */
+/*       unregister_code(KC_K); */
+/*       unregister_code(KC_LGUI); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_A) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_A); */
+/*       unregister_code(KC_A); */
+/*       unregister_code(KC_LGUI); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_S) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_S); */
+/*       unregister_code(KC_S); */
+/*       unregister_code(KC_LGUI); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_D) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_D); */
+/*       unregister_code(KC_D); */
+/*       unregister_code(KC_LGUI); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_F) { */
+/*       register_code(KC_LCTL); */
+/*       register_code(KC_F); */
+/*       unregister_code(KC_F); */
+/*       unregister_code(KC_LCTL); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_1) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_1); */
+/*       unregister_code(KC_1); */
+/*       unregister_code(KC_LGUI); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_2) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_2); */
+/*       unregister_code(KC_2); */
+/*       unregister_code(KC_LGUI); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_3) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_3); */
+/*       unregister_code(KC_3); */
+/*       unregister_code(KC_LGUI); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_4) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_4); */
+/*       unregister_code(KC_4); */
+/*       unregister_code(KC_LGUI); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_5) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_5); */
+/*       unregister_code(KC_5); */
+/*       unregister_code(KC_LGUI); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_6) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_6); */
+/*       unregister_code(KC_6); */
+/*       unregister_code(KC_LGUI); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_7) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_7); */
+/*       unregister_code(KC_7); */
+/*       unregister_code(KC_LGUI); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_8) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_8); */
+/*       unregister_code(KC_8); */
+/*       unregister_code(KC_LGUI); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_P) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_P); */
+/*       unregister_code(KC_P); */
+/*       unregister_code(KC_LGUI); */
+/*    } */
+/*     SEQ_ONE_KEY(KC_E) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_E); */
+/*       unregister_code(KC_E); */
+/*       unregister_code(KC_LGUI); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_R) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_R); */
+/*       unregister_code(KC_R); */
+/*       unregister_code(KC_LGUI); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_P) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_P); */
+/*       unregister_code(KC_P); */
+/*       unregister_code(KC_LGUI); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_U) { */
+/*       register_code(KC_LCTL); */
+/*       register_code(KC_U); */
+/*       unregister_code(KC_U); */
+/*       unregister_code(KC_LCTL); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_I) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_I); */
+/*       unregister_code(KC_I); */
+/*       unregister_code(KC_LGUI); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_A) { */
+/*       register_code(KC_LCTL); */
+/*       register_code(KC_A); */
+/*       unregister_code(KC_A); */
+/*       unregister_code(KC_LCTL); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_X) { */
+/*       register_code(KC_LCTL); */
+/*       register_code(KC_X); */
+/*       unregister_code(KC_X); */
+/*       unregister_code(KC_LCTL); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_C) { */
+/*       register_code(KC_LCTL); */
+/*       register_code(KC_C); */
+/*       unregister_code(KC_C); */
+/*       unregister_code(KC_LCTL); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_V) { */
+/*       register_code(KC_LCTL); */
+/*       register_code(KC_V); */
+/*       unregister_code(KC_V); */
+/*       unregister_code(KC_LCTL); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_K) { */
+/*       register_code(KC_LCTL); */
+/*       register_code(KC_K); */
+/*       unregister_code(KC_K); */
+/*       unregister_code(KC_LCTL); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_B) { */
+/*       register_code(KC_LCTL); */
+/*       register_code(KC_B); */
+/*       unregister_code(KC_B); */
+/*       unregister_code(KC_LCTL); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_U) { */
+/*       register_code(KC_LCTL); */
+/*       register_code(KC_U); */
+/*       unregister_code(KC_U); */
+/*       unregister_code(KC_LCTL); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_T) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_T); */
+/*       unregister_code(KC_T); */
+/*       unregister_code(KC_LGUI); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_BSLS) { */
+/*       register_code(KC_LCTL); */
+/*       register_code(KC_BSLS); */
+/*       unregister_code(KC_BSLS); */
+/*       unregister_code(KC_LCTL); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_SPC) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_SPC); */
+/*       unregister_code(KC_SPC); */
+/*       unregister_code(KC_LGUI); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_LBRC) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_LBRC); */
+/*       unregister_code(KC_LBRC); */
+/*       unregister_code(KC_LGUI); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_LCBR) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_LSFT); */
+/*       register_code(KC_LBRC); */
+/*       unregister_code(KC_LBRC); */
+/*       unregister_code(KC_LSFT); */
+/*       unregister_code(KC_LGUI); */
+/*     }     */
+/*     SEQ_ONE_KEY(KC_RCBR) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_LSFT); */
+/*       register_code(KC_RBRC); */
+/*       unregister_code(KC_RBRC); */
+/*       unregister_code(KC_LSFT); */
+/*       unregister_code(KC_LGUI); */
+/*     } */
+/*     SEQ_ONE_KEY(KC_GRV) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_GRV); */
+/*       unregister_code(KC_GRV); */
+/*       unregister_code(KC_LGUI); */
+/*     }     */
+/*     SEQ_ONE_KEY(KC_LEAD) { */
+/*       register_code(KC_LGUI); */
+/*       register_code(KC_TAB); */
+/*       unregister_code(KC_TAB); */
+/*       unregister_code(KC_LGUI); */
+/*     } */
+
+/*     /\* SEQ_ONE_KEY(KC_9) { *\/ */
+/*     /\*   register_code(KC_LGUI); *\/ */
+/*     /\*   register_code(KC_9); *\/ */
+/*     /\*   unregister_code(KC_9); *\/ */
+/*     /\*   unregister_code(KC_LGUI); *\/ */
+/*     /\* } *\/ */
+/*     /\* SEQ_TWO_KEYS(KC_A, KC_S) { *\/ */
+/*     /\*   register_code(KC_H); *\/ */
+/*     /\*   unregister_code(KC_H); *\/ */
+/*     /\* } *\/ */
+/*     /\* SEQ_THREE_KEYS(KC_A, KC_S, KC_D) { *\/ */
+/*     /\*   register_code(KC_LGUI); *\/ */
+/*     /\*   register_code(KC_S); *\/ */
+/*     /\*   unregister_code(KC_S); *\/ */
+/*     /\*   unregister_code(KC_LGUI); *\/ */
+/*     /\* } *\/ */
+/*   } */
